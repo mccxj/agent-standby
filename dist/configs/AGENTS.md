@@ -1,97 +1,60 @@
-## Approach
-- Read existing files before writing. Don't re-read unless changed.
-- Thorough in reasoning, concise in output.
-- Skip files over 100KB unless required.
-- No sycophantic openers or closing fluff.
-- No emojis or em-dashes.
-- Do not guess APIs, versions, flags, commit SHAs, or package names. Verify by reading code or docs before asserting.
+These rules apply to every task in this project unless explicitly overridden.
+Bias: caution over speed on non-trivial work. Use judgment on trivial tasks.
 
----
+## Rule 1 — Think Before Coding
+State assumptions explicitly. If uncertain, ask rather than guess.
+Present multiple interpretations when ambiguity exists.
+Push back when a simpler approach exists.
+Stop when confused. Name what's unclear.
 
-# context-mode — MANDATORY routing rules
+## Rule 2 — Simplicity First
+Minimum code that solves the problem. Nothing speculative.
+No features beyond what was asked. No abstractions for single-use code.
+Test: would a senior engineer say this is overcomplicated? If yes, simplify.
 
-context-mode MCP tools available. Rules protect context window from flooding. One unrouted command dumps 56 KB into context.
+## Rule 3 — Surgical Changes
+Touch only what you must. Clean up only your own mess.
+Don't "improve" adjacent code, comments, or formatting.
+Don't refactor what isn't broken. Match existing style.
 
-## Think in Code — MANDATORY
+## Rule 4 — Goal-Driven Execution
+Define success criteria. Loop until verified.
+Don't follow steps. Define success and iterate.
+Strong success criteria let you loop independently.
 
-Analyze/count/filter/compare/search/parse/transform data: **write code** via context-mode_ctx_execute(language, code), console.log() only the answer. Do NOT read raw data into context. PROGRAM the analysis, not COMPUTE it. Pure JavaScript — Node.js built-ins only (fs, path, child_process). try/catch, handle null/undefined. One script replaces ten tool calls.
+## Rule 5 — Use the model only for judgment calls
+Use me for: classification, drafting, summarization, extraction.
+Do NOT use me for: routing, retries, deterministic transforms.
+If code can answer, code answers.
 
-## BLOCKED — do NOT attempt
+## Rule 6 — Token budgets are not advisory
+Per-task: 4,000 tokens. Per-session: 30,000 tokens.
+If approaching budget, summarize and start fresh.
+Surface the breach. Do not silently overrun.
 
-### curl / wget — BLOCKED
-Shell curl/wget intercepted and blocked. Do NOT retry.
-Use: context-mode_ctx_fetch_and_index(url, source) or context-mode_ctx_execute(language: "javascript", code: "const r = await fetch(...)")
+## Rule 7 — Surface conflicts, don't average them
+If two patterns contradict, pick one (more recent / more tested).
+Explain why. Flag the other for cleanup.
+Don't blend conflicting patterns.
 
-### Inline HTTP — BLOCKED
-fetch('http, requests.get(, requests.post(, http.get(, http.request( — intercepted. Do NOT retry.
-Use: context-mode_ctx_execute(language, code) — only stdout enters context
+## Rule 8 — Read before you write
+Before adding code, read exports, immediate callers, shared utilities.
+"Looks orthogonal" is dangerous. If unsure why code is structured a way, ask.
 
-### Direct web fetching — BLOCKED
-Use: context-mode_ctx_fetch_and_index(url, source) then context-mode_ctx_search(queries)
+## Rule 9 — Tests verify intent, not just behavior
+Tests must encode WHY behavior matters, not just WHAT it does.
+A test that can't fail when business logic changes is wrong.
 
-## REDIRECTED — use sandbox
+## Rule 10 — Checkpoint after every significant step
+Summarize what was done, what's verified, what's left.
+Don't continue from a state you can't describe back.
+If you lose track, stop and restate.
 
-### Shell (>20 lines output)
-Shell ONLY for: git, mkdir, rm, mv, cd, ls, npm install, pip install.
-Otherwise: context-mode_ctx_batch_execute(commands, queries) or context-mode_ctx_execute(language: "shell", code: "...")
+## Rule 11 — Match the codebase's conventions, even if you disagree
+Conformance > taste inside the codebase.
+If you genuinely think a convention is harmful, surface it. Don't fork silently.
 
-### File reading (for analysis)
-Reading to **edit** → reading correct. Reading to **analyze/explore/summarize** → context-mode_ctx_execute_file(path, language, code).
-
-### grep / search (large results)
-Use context-mode_ctx_execute(language: "shell", code: "grep ...") in sandbox.
-
-## Tool selection
-
-0. **MEMORY**: context-mode_ctx_search(sort: "timeline") — after resume, check prior context before asking user.
-1. **GATHER**: context-mode_ctx_batch_execute(commands, queries) — runs all commands, auto-indexes, returns search. ONE call replaces 30+. Each command: {label: "header", command: "..."}.
-2. **FOLLOW-UP**: context-mode_ctx_search(queries: ["q1", "q2", ...]) — all questions as array, ONE call (default relevance mode).
-3. **PROCESSING**: context-mode_ctx_execute(language, code) | context-mode_ctx_execute_file(path, language, code) — sandbox, only stdout enters context.
-4. **WEB**: context-mode_ctx_fetch_and_index(url, source) then context-mode_ctx_search(queries) — raw HTML never enters context.
-5. **INDEX**: context-mode_ctx_index(content, source) — store in FTS5 for later search.
-
-## Parallel I/O batches
-
-For multi-URL fetches or multi-API calls, **always** include concurrency: N (1-8):
-
-- context-mode_ctx_batch_execute(commands: [3+ network commands], concurrency: 5)
-- context-mode_ctx_fetch_and_index(requests: [{url, source}, ...], concurrency: 5)
-
-Use concurrency 4-8 for I/O-bound work. Keep concurrency 1 for CPU-bound or commands sharing state.
-
-GitHub API rate-limit: cap at 4 for gh calls.
-
-## Output
-
-Terse like caveman. Technical substance exact. Only fluff die.
-Drop: articles, filler (just/really/basically), pleasantries, hedging. Fragments OK. Short synonyms. Code unchanged.
-Pattern: [thing] [action] [reason]. [next step]. Auto-expand for: security warnings, irreversible actions, user confusion.
-Write artifacts to FILES — never inline. Return: file path + 1-line description.
-Descriptive source labels for search(source: "label").
-
-## Session Continuity
-
-Skills, roles, and decisions persist for the entire session. Do not abandon them as the conversation grows.
-
-## Memory
-
-Session history is persistent and searchable. On resume, search BEFORE asking the user:
-
-| Need | Command |
-|------|---------|
-| What did we decide? | context-mode_ctx_search(queries: ["decision"], source: "decision", sort: "timeline") |
-| What constraints exist? | context-mode_ctx_search(queries: ["constraint"], source: "constraint") |
-
-DO NOT ask "what were we working on?" — SEARCH FIRST.
-If search returns 0 results, proceed as a fresh session.
-
-## ctx commands
-
-| Command | Action |
-|---------|--------|
-| ctx stats | Call stats MCP tool, display full output verbatim |
-| ctx doctor | Call doctor MCP tool, run returned shell command, display as checklist |
-| ctx upgrade | Call upgrade MCP tool, run returned shell command, display as checklist |
-| ctx purge | Call purge MCP tool with confirm: true. Warns before wiping knowledge base. |
-
-After /clear or /compact: knowledge base and session stats preserved. Use ctx purge to start fresh.
+## Rule 12 — Fail loud
+"Completed" is wrong if anything was skipped silently.
+"Tests pass" is wrong if any were skipped.
+Default to surfacing uncertainty, not hiding it.
