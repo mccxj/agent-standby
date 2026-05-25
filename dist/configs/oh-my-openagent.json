@@ -9,75 +9,65 @@
 
   "categories": {
     "deep-reasoning": {
-      "model": "x-openai/nvidia/z-ai/glm-5.1",
+      "model": "{env:AGENT_MODEL_HIGH}",
       "temperature": 0.1,
       "reasoningEffort": "xhigh"
     },
 
     "general-execution": {
-      "model": "x-openai/opencode/minimax-m2.5-free", 
+      "model": "{env:AGENT_MODEL_MID}",
       "temperature": 0.1,
       "reasoningEffort": "medium"
     },
 
     "quick-fix": {
-      "model": "x-openai/opencode/minimax-m2.5-free",
+      "model": "{env:AGENT_MODEL_LOW}",
       "temperature": 0.1,
       "reasoningEffort": "low"
-    },
-
-    "information-documentation": {
-      "model": "x-openai/opencode/minimax-m2.5-free",
-      "temperature": 0.1,
-      "reasoningEffort": "medium"
-    },
-
-    "creative-generation": {
-      "model": "x-openai/ollama/qwen3-vl:235b-instruct",
-      "temperature": 0.7
     }
   },
 
   "agents": {
-    "prometheus": { 
-      "category": "deep-reasoning", 
-      "reasoningEffort": "xhigh" 
+    "prometheus": {
+      "category": "deep-reasoning",
+      "reasoningEffort": "xhigh"
     },
-    "metis": { 
-      "category": "deep-reasoning", 
-      "reasoningEffort": "xhigh" 
+    "metis": {
+      "category": "deep-reasoning",
+      "reasoningEffort": "xhigh"
     },
-    "oracle": { 
-      "category": "deep-reasoning", 
-      "reasoningEffort": "xhigh" 
+    "oracle": {
+      "category": "deep-reasoning",
+      "reasoningEffort": "xhigh"
     },
 
-    "sisyphus": { 
-      "category": "general-execution", 
+    "sisyphus": {
+      "category": "general-execution",
       "reasoningEffort": "high"
     },
-    "hephaestus": { 
+    "hephaestus": {
       "category": "general-execution",
       "reasoningEffort": "high",
       "upgrade_rules": [
         { "file_count": ">5", "category": "deep-reasoning" },
-        { "line_changes": ">200", "category": "deep-reasoning" },
-        { "keywords": ["重构", "算法", "性能优化", "安全", "并发", "JDK21", "迁移", "CAPTCHA"], "category": "deep-reasoning" }
+        { "line_changes": ">200", "category": "deep-reasoning" }
       ]
     },
-    "momus": { 
+    "momus": {
       "category": "general-execution",
       "reasoningEffort": "high",
       "upgrade_rules": [
         { "keywords": ["架构评审", "技术方案", "设计文档", "审计"], "category": "deep-reasoning" }
       ]
     },
-    "multimodal-looker": { "category": "creative-generation" },
     "atlas": { "category": "general-execution" },
     "sisyphus-junior": { "category": "general-execution" },
+
     "explore": { "category": "quick-fix" },
-    "frontend": { "category": "creative-generation" },
-    "librarian": { "category": "information-documentation" }
+    "librarian": { "category": "quick-fix" },
+
+    "multimodal-looker": { "category": "general-execution" },
+    "frontend": { "category": "general-execution" }
   },
 
   "disabled_categories": [
