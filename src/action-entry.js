@@ -54,9 +54,13 @@ async function run() {
       core.setOutput('agent_type', result.agentType);
     }
 
-    logger.info(`Config directory: ${result.configDir}`);
-    logger.info(`Skills synced to: ${result.skillsDestination}`);
+  logger.info(`Config directory: ${result.configDir}`);
+  logger.info(`Skills synced to: ${result.skillsDestination}`);
+  if (result.agentType === 'opencode') {
     logger.info(`Opencode config: ${result.opencodeConfigDir}`);
+  } else if (result.agentType === 'claude') {
+    logger.info(`Claude settings: ${result.configDir}/settings.json`);
+  }
     if (result.pluginsDestination) {
       logger.info(`Plugins synced to: ${result.pluginsDestination}`);
     }

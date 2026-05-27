@@ -18,10 +18,14 @@ const AGENT_CONFIG_DIRS = {
 
 const OPENCODE_CONFIG_DIR_NAME = '.config/opencode';
 
-const CONFIG_FILES = [
+const OPENCODE_CONFIG_FILES = [
   { filename: 'AGENTS.md' },
   { filename: 'opencode.jsonc' },
   { filename: 'oh-my-openagent.json' },
+];
+
+const CLAUDE_CONFIG_FILES = [
+  { filename: 'settings.json' },
 ];
 
 function getLocalConfigDir() {
@@ -92,10 +96,10 @@ function writeGitHubEnv(envVars) {
   fs.appendFileSync(githubEnv, lines.join(os.EOL) + os.EOL, 'utf-8');
 }
 
-async function writeOpencodeConfig(configDir, replaceEnv = false) {
+async function writeConfigFiles(configDir, configFiles, replaceEnv = false) {
   fs.mkdirSync(configDir, { recursive: true });
 
-  for (const file of CONFIG_FILES) {
+  for (const file of configFiles) {
     const srcPath = path.join(getLocalConfigDir(), file.filename);
     const destPath = path.join(configDir, file.filename);
     if (!fs.existsSync(srcPath)) {
@@ -178,7 +182,12 @@ async function setup(options = {}) {
   copyDirectory(skillsPath, skillsDest);
 
   const opencodeConfigDir = path.join(getHomeDir(), OPENCODE_CONFIG_DIR_NAME);
-  await writeOpencodeConfig(opencodeConfigDir, replaceEnv);
+
+  if (agentType === 'opencode') {
+    await writeConfigFiles(opencodeConfigDir, OPENCODE_CONFIG_FILES, replaceEnv);
+  } else if (agentType === 'claude') {
+    await writeConfigFiles(configDir, CLAUDE_CONFIG_FILES, replaceEnv);
+  }
 
   // Copy plugins to ~/.config/opencode/plugins for opencode agent
   const pluginsSrcDir = getLocalPluginsDir();
@@ -219,14 +228,15 @@ module.exports = {
   normalizeAgentType,
   isGitHubActions,
   writeGitHubEnv,
-  writeOpencodeConfig,
+  writeConfigFiles,
   replaceEnvPlaceholders,
   copyDirectory,
   ensureContextMode,
   VALID_AGENT_TYPES,
   AGENT_CONFIG_DIRS,
   OPENCODE_CONFIG_DIR_NAME,
-  CONFIG_FILES,
+  OPENCODE_CONFIG_FILES,
+  CLAUDE_CONFIG_FILES,
   getLocalConfigDir,
   getLocalPluginsDir,
 };

@@ -13,8 +13,11 @@
 ├── action.yml          # GitHub Action definition (node20, dist/index.js)
 ├── package.json        # npm package (@mccxj/agent-standby)
 ├── .opencode.json      # MCP server config (code-review-graph)
-├── configs/            # Local agent config files (AGENTS.md, opencode.jsonc, oh-my-openagent.json)
-│   └── AGENTS.md       # ⚠ Deployed config template — NOT a codebase knowledge file
+├── configs/ # Local agent config files
+│ ├── AGENTS.md # ⚠ Deployed config template — NOT a codebase knowledge file
+│ ├── opencode.jsonc # OpenCode config (provider, models, MCP, LSP)
+│ ├── oh-my-openagent.json # OpenCode model tier config (deep-reasoning/general-execution/quick-fix)
+│ └── settings.json # Claude Code config (env, model, permissions, mcpServers)
 ├── plugins/            # OpenCode plugins (synced to ~/.opencode/plugins/)
 │   └── rtk.ts          # Bash/shell tool rewriter via `rtk rewrite`
 ├── src/
@@ -52,7 +55,7 @@
 | Change Action behavior | `src/action-entry.js` | Uses @actions/core, reads `agent_type` + `replace_env` inputs |
 | Core setup logic | `src/core/setup.js` | Config dir resolution, skills copy, plugins copy, config copy, env vars |
 | Logging | `src/core/logger.js` | Dual logger — auto-detects CI vs local |
-| Add config file downloads | `src/core/setup.js` → `CONFIG_FILES` | Array of `{filename}` copied from `configs/` directory |
+|| Add config file downloads | `src/core/setup.js` → `OPENCODE_CONFIG_FILES` / `CLAUDE_CONFIG_FILES` | Array of `{filename}` copied from `configs/` directory by agent type ||
 | Add/modify plugins | `plugins/<name>.ts` | Synced to `~/.opencode/plugins/` by `getLocalPluginsDir()` |
 | CI pipeline | `.github/workflows/opencode.yml` | Triggers on `/oc` comment, installs code-review-graph |
 | Release pipeline | `.github/workflows/release.yml` | Builds dist/, commits dist/ back, tags latest, publishes to npm |
@@ -77,7 +80,7 @@
 - **Skills sync**: Copied to `~/.config/opencode/skills/` or `~/.claude/skills/` based on agent type
 - **Plugins sync**: `plugins/` directory copied to `~/.opencode/plugins/` (opencode only)
 - **Config dirs**: opencode → `~/.opencode/`, claude → `~/.claude/`
-- **Config files**: Copied from `configs/` directory to `~/.config/opencode/`
+- **Config files**: opencode → copied to `~/.config/opencode/` (AGENTS.md, opencode.jsonc, oh-my-openagent.json); claude → copied to `~/.claude/` (settings.json)
 - **Context-mode**: `ensureContextMode()` in setup.js — installs context-mode MCP if missing
 - **No linter/formatter** — no eslint, prettier, or .editorconfig configured
 - **No test framework** — no test infrastructure exists
